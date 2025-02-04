@@ -4,7 +4,7 @@ import { View } from 'react-native'
 
 export default function RootLayout() {
   return (
-    <View className='bg-slate-50 flex-1 items-center justify-center'>
+    <View className='bg-slate-50 flex-1'>
       <Slot />
     </View>
   )
