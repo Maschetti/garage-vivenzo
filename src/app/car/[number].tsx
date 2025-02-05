@@ -1,9 +1,47 @@
-import { Cars } from '@/constants/Cars';
+import { Cars, CarState } from '@/constants/Cars';
 import { ParkedCars } from '@/constants/ParkedCars';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, ReceiptText } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Button, Text, TouchableOpacity, View } from 'react-native';
+
+type StateContainerProps = {
+  state: CarState,
+  changeState: (state: CarState) => void
+  floor?: string
+  spot?: string
+}
+
+function StateContainer({state, changeState, floor, spot}: StateContainerProps) {
+  const title = state === 'parked' ? 'Estacionado'
+  : state === 'at the hall' ? 'Recepção'
+  : 'Com o cliente'
+  return (
+    <View className='p-2'>
+      <Text className='text-xl font-bold uppercase text-red-600 self-center'>{title}</Text>
+      <View>
+        {state === 'parked' && (
+          <View>
+            <Button title="Recepção" onPress={() => changeState('at the hall')} />
+            <Text>Andar: {floor}</Text>
+            <Text>Vaga: {spot}</Text>
+          </View>
+        )}
+        {state === 'with client' && (
+          <Button title="Recepção" onPress={() => changeState('at the hall')} />
+        )}
+        {state === 'at the hall' && (
+          <View className='flex flex-row gap-2 flex-wrap justify-center'>
+            <Button title="Estacionar" onPress={() => changeState('parked')} />
+            <Button title="Check Out" onPress={() => changeState('with client')} />
+            <Button title="Entregue ao cliente" onPress={() => changeState('with client')} />
+          </View>
+        )}
+      </View>
+
+    </View>
+  )
+}
 
 export default function CarPage() {
   const { number } = useLocalSearchParams();
@@ -12,28 +50,10 @@ export default function CarPage() {
 
   const [localState, setLocalState] = useState(car?.state);
 
-  const local = localState === 'parked' ? ParkedCars.find(car => car.number === number)?.place : 'Aleatório'
+  const carP = localState === 'parked' ? ParkedCars.find(car => car.number === number) : undefined
 
-  function Parked() {
-    return(
-      <View>
-        <Text>Local: {local}</Text>
-        <Button title="Put in the Hall" onPress={() => setLocalState('at the hall')} />
-      </View>
-    )
-  }
-
-  function WithClient() {
-    return <Button title="Put in the Hall" onPress={() => setLocalState('at the hall')} />
-  }
-
-  function AtHall() {
-    return <View>
-      <Button title="Estacionado" onPress={() => setLocalState('parked')} />
-      <Button title="Entregue ao cliente" onPress={() => setLocalState('with client')} />
-      <Button title="Check Out" onPress={() => setLocalState('with client')} />
-    </View>
-  }
+  const floor = carP ? carP.floor : undefined
+  const spot = carP ? carP.spot : undefined
 
   if (!car) {
     return (
@@ -45,9 +65,10 @@ export default function CarPage() {
 
   return (
     <View>
+
       <View>
         <TouchableOpacity
-          className="flex flex-row items-center gap-4 p-2"
+          className="flex flex-row items-center gap-4 p-2 border-b border-slate-300"
           onPress={() => router.push('/')}
         >
           <ArrowLeft color="black" size={30}/>
@@ -56,6 +77,17 @@ export default function CarPage() {
         {/* <Button title="History Track" onPress={() => router.push(`/car/${number}/history`)} />
         <Button title="Ticket" onPress={() => router.push(`/car/${number}/ticket`)} /> */}
         
+      </View>
+
+      <View className='flex flex-row p-2'>
+        <TouchableOpacity
+          className="flex-1 items-center justify-center bg-green-500 rounded-md"
+          onPress={() => router.push('/')}
+        >
+          <Text className='text-black text-2xl'>Histórico</Text>
+        </TouchableOpacity>
+
+        <ReceiptText color="black" size={30} />
       </View>
 
       <View className='p-2 border-y border-slate-300'>
@@ -73,15 +105,7 @@ export default function CarPage() {
       </View>
       
       <View className='p-2'>
-        {localState === 'parked' && (
-          <Parked />
-        )}
-        {localState === 'with client' && (
-          <WithClient />
-        )}
-        {localState === 'at the hall' && (
-          <AtHall />
-        )}
+        <StateContainer state={localState as CarState} changeState={setLocalState} floor={floor} spot={spot}/>
       </View>
     </View>
   );

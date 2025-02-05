@@ -15,7 +15,8 @@ function CarListItem(item: Car) {
   ? ParkedCars.find(car => car.number === item.number)
   : undefined
 
-  const place = ParkInfo?.place
+  const floor = ParkInfo?.floor
+  const spot = ParkInfo?.spot
   const id = ParkInfo?.identifier
   
   return (
@@ -35,7 +36,7 @@ function CarListItem(item: Car) {
           {CarState === 'Estacionado' && (
             <View>
               <Text className="font-bold">
-                {place}
+                {floor} - {spot}
               </Text>
               <Text>
                 Prisma: {id}
