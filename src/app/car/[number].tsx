@@ -1,3 +1,4 @@
+import ParkModal from '@/components/ParkModal';
 import { Cars, CarState } from '@/constants/Cars';
 import { ParkedCars } from '@/constants/ParkedCars';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -8,11 +9,12 @@ import { Button, Text, TouchableOpacity, View } from 'react-native';
 type StateContainerProps = {
   state: CarState,
   changeState: (state: CarState) => void
+  openModal: () => void
   floor?: string
   spot?: string
 }
 
-function StateContainer({state, changeState, floor, spot}: StateContainerProps) {
+function StateContainer({state, changeState, floor, spot, openModal}: StateContainerProps) {
   const title = state === 'parked' ? 'Estacionado'
   : state === 'at the hall' ? 'Recepção'
   : 'Com o cliente'
@@ -32,7 +34,7 @@ function StateContainer({state, changeState, floor, spot}: StateContainerProps) 
         )}
         {state === 'at the hall' && (
           <View className='flex flex-row gap-2 flex-wrap justify-center'>
-            <Button title="Estacionar" onPress={() => changeState('parked')} />
+            <Button title="Estacionar" onPress={openModal} />
             <Button title="Check Out" onPress={() => changeState('with client')} />
             <Button title="Entregue ao cliente" onPress={() => changeState('with client')} />
           </View>
@@ -52,8 +54,21 @@ export default function CarPage() {
 
   const carP = localState === 'parked' ? ParkedCars.find(car => car.number === number) : undefined
 
-  const floor = carP ? carP.floor : undefined
-  const spot = carP ? carP.spot : undefined
+  const [floor, setFloor] = useState(carP ? carP.floor : undefined);
+  const [spot, setSpot] = useState(carP ? carP.spot : undefined);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  
+  function onClose() {
+    setIsModalVisible(false);
+  }
+
+  function onConfirm(floor: string, spot: string) {
+    setFloor(floor);
+    setSpot(spot);
+    setLocalState('parked');
+    setIsModalVisible(false);
+  }
 
   if (!car) {
     return (
@@ -105,8 +120,15 @@ export default function CarPage() {
       </View>
       
       <View className='p-2'>
-        <StateContainer state={localState as CarState} changeState={setLocalState} floor={floor} spot={spot}/>
+        <StateContainer
+          openModal={() => setIsModalVisible(true)}
+          state={localState as CarState}
+          changeState={setLocalState}
+          floor={floor}
+          spot={spot}/>
       </View>
+
+      <ParkModal isModalVisible={isModalVisible} onClose={onClose} onConfirm={onConfirm} />
     </View>
   );
 }
