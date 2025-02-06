@@ -17,7 +17,6 @@ function CarListItem(item: Car) {
 
   const floor = ParkInfo?.floor
   const spot = ParkInfo?.spot
-  const id = ParkInfo?.identifier
   
   return (
     <Link
@@ -37,9 +36,6 @@ function CarListItem(item: Car) {
             <View>
               <Text className="font-bold">
                 {floor} - {spot}
-              </Text>
-              <Text>
-                Prisma: {id}
               </Text>
             </View>
           )}
