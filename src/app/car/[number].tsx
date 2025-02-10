@@ -1,8 +1,9 @@
 import ParkModal from '@/components/ParkModal';
+import UpdateCarModal from '@/components/UpdateCarModal';
 import { Cars, CarState } from '@/constants/Cars';
 import { ParkedCars } from '@/constants/ParkedCars';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, ReceiptText } from 'lucide-react-native';
+import { ArrowLeft, PencilLine, ReceiptText } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Button, Text, TouchableOpacity, View } from 'react-native';
 
@@ -57,17 +58,22 @@ export default function CarPage() {
   const [floor, setFloor] = useState(carP ? carP.floor : undefined);
   const [spot, setSpot] = useState(carP ? carP.spot : undefined);
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  
-  function onClose() {
-    setIsModalVisible(false);
+  const [isParkModalVisible, setIsParkModalVisible] = useState(false);
+  const [isUpdateCarModalVisible, setIsUpdateCarParkModalVisible] = useState(false);
+
+  function onCloseParkModal() {
+    setIsParkModalVisible(false);
+  }
+
+  function onCloseUpdateCarModal() {
+    setIsUpdateCarParkModalVisible(false);
   }
 
   function onConfirm(floor: string, spot: string) {
     setFloor(floor);
     setSpot(spot);
     setLocalState('parked');
-    setIsModalVisible(false);
+    setIsParkModalVisible(false);
   }
 
   if (!car) {
@@ -106,7 +112,17 @@ export default function CarPage() {
       </View>
 
       <View className='p-2 border-y border-slate-300'>
-        <Text className='text-lg font-bold'>Informações básicas:</Text>
+        <View className='flex flex-row gap-2'>
+          <Text className='text-xl font-bold'>Informações básicas:</Text>
+
+          <TouchableOpacity
+            onPress={() => setIsUpdateCarParkModalVisible(true)}
+          >
+            <PencilLine color="#60a5fa" size={25} />
+          </TouchableOpacity>
+          
+        </View>
+        
         <View className='flex-row'>
           <View className='w-1/2'>
             <Text className='text-lg'>Dono: {car.owner}</Text>
@@ -121,14 +137,15 @@ export default function CarPage() {
       
       <View className='p-2'>
         <StateContainer
-          openModal={() => setIsModalVisible(true)}
+          openModal={() => setIsParkModalVisible(true)}
           state={localState as CarState}
           changeState={setLocalState}
           floor={floor}
           spot={spot}/>
       </View>
 
-      <ParkModal isModalVisible={isModalVisible} onClose={onClose} onConfirm={onConfirm} />
+      <ParkModal isModalVisible={isParkModalVisible} onClose={onCloseParkModal} onConfirm={onConfirm} />
+      <UpdateCarModal isModalVisible={isUpdateCarModalVisible} closeModal={onCloseUpdateCarModal} number={car.number} />
     </View>
   );
 }
